@@ -1,3 +1,5 @@
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
 export class TaskManager {
   constructor(player) {
     this.player = player;
@@ -7,6 +9,13 @@ export class TaskManager {
     this.feedback = document.getElementById('task-feedback');
     this.closeBtn = document.getElementById('close-task-btn');
     
+    // Initialize Gemini
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    if (apiKey) {
+      this.genAI = new GoogleGenerativeAI(apiKey);
+      this.model = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    }
+
     // Minimap
     this.minimapCanvas = document.createElement('canvas');
     this.minimapCanvas.width = 180; this.minimapCanvas.height = 180;
@@ -52,7 +61,7 @@ export class TaskManager {
     this.overlay.classList.remove('hidden');
     this.title.innerText = task.title;
     this.feedback.innerText = '';
-    this.content.innerHTML = '';
+    this.content.innerHTML = '<div class="loading-ai">INITIALIZING NEURAL DECRYPTOR...</div>';
     document.exitPointerLock();
     
     const avatarId = this.player.avatar.id;
@@ -146,27 +155,32 @@ export class TaskManager {
     this.renderQuestion('CRYPTOGRAPHY');
   }
 
-  renderQuestion(category) {
-    const questions = {
-      'NETWORK SECURITY': [
-        { q: "Which protocol is used to securely resolve domain names?", a: ["DNSSEC", "HTTPS", "SFTP", "SSH"], c: 0 },
-        { q: "What is the primary purpose of a DMZ in a network?", a: ["Data Backup", "Host public services", "Internal Storage", "User Auth"], c: 1 },
-        { q: "Which attack involves flooding a target with traffic?", a: ["Phishing", "DDoS", "SQLi", "XSS"], c: 1 }
-      ],
-      'APPLICATION SECURITY': [
-        { q: "What does XSS stand for?", a: ["Cross-Site Scripting", "Extensible Security", "X-ray Security", "Cross-Server Sync"], c: 0 },
-        { q: "How can you prevent SQL Injection?", a: ["Strong Passwords", "Parameterized Queries", "WAF Only", "Hashing"], c: 1 },
-        { q: "Which HTTP header prevents clickjacking?", a: ["X-Frame-Options", "CORS", "Content-Type", "Set-Cookie"], c: 0 }
-      ],
-      'CRYPTOGRAPHY': [
-        { q: "Which algorithm is asymmetric?", a: ["AES", "DES", "RSA", "Blowfish"], c: 2 },
-        { q: "What is a Salt in hashing used for?", a: ["Encryption", "Speed", "Preventing Rainbow Tables", "Compression"], c: 2 },
-        { q: "Which hash is considered insecure today?", a: ["SHA-256", "SHA-3", "MD5", "Bcrypt"], c: 2 }
-      ]
-    };
+  async renderQuestion(category) {
+    let data;
+    
+    if (this.model) {
+      try {
+        const prompt = `Generate a complex multiple-choice cybersecurity question for the category: ${category}. 
+        Return ONLY a JSON object with:
+        "q": (string) the question,
+        "a": (array of 4 strings) options,
+        "c": (integer 0-3) index of the correct answer.
+        The question should be technical and suitable for a professional simulation.`;
 
-    const pool = questions[category] || questions['NETWORK SECURITY'];
-    const data = pool[Math.floor(Math.random() * pool.length)];
+        const result = await this.model.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
+        
+        // Clean the response in case Gemini wraps it in markdown code blocks
+        const jsonStr = text.replace(/```json|```/g, '').trim();
+        data = JSON.parse(jsonStr);
+      } catch (e) {
+        console.error("Gemini failed, using fallback:", e);
+        data = this.getFallbackQuestion(category);
+      }
+    } else {
+      data = this.getFallbackQuestion(category);
+    }
 
     this.content.innerHTML = `<div class="task-desc">${data.q}</div>`;
     const optionsGrid = document.createElement('div');
@@ -191,6 +205,26 @@ export class TaskManager {
     });
 
     this.content.appendChild(optionsGrid);
+  }
+
+  getFallbackQuestion(category) {
+    const questions = {
+      'NETWORK SECURITY': [
+        { q: "Which protocol is used to securely resolve domain names?", a: ["DNSSEC", "HTTPS", "SFTP", "SSH"], c: 0 },
+        { q: "What is the primary purpose of a DMZ in a network?", a: ["Data Backup", "Host public services", "Internal Storage", "User Auth"], c: 1 }
+      ],
+      'APPLICATION SECURITY': [
+        { q: "What does XSS stand for?", a: ["Cross-Site Scripting", "Extensible Security", "X-ray Security", "Cross-Server Sync"], c: 0 },
+        { q: "How can you prevent SQL Injection?", a: ["Strong Passwords", "Parameterized Queries", "WAF Only", "Hashing"], c: 1 }
+      ],
+      'CRYPTOGRAPHY': [
+        { q: "Which algorithm is asymmetric?", a: ["AES", "DES", "RSA", "Blowfish"], c: 2 },
+        { q: "What is a Salt in hashing used for?", a: ["Encryption", "Speed", "Preventing Rainbow Tables", "Compression"], c: 2 }
+      ]
+    };
+
+    const pool = questions[category] || questions['NETWORK SECURITY'];
+    return pool[Math.floor(Math.random() * pool.length)];
   }
 
   completeTask(reward) {
