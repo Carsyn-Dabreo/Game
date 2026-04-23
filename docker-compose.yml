@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: cybergrid-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: cybergrid
+      POSTGRES_USER: cyber
+      POSTGRES_PASSWORD: grid_secret
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./server/db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    networks:
+      - cybergrid-network
+
+  # Redis (Optional - for session caching)
+  redis:
+    image: redis:7-alpine
+    container_name: cybergrid-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - cybergrid-network
+    profiles:
+      - optional
+
+  # Backend Server
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: cybergrid-server
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgres://cyber:grid_secret@db:5432/cybergrid
+      REDIS_URL: redis://redis:6379
+    ports:
+      - "3001:3001"
+    depends_on:
+      - db
+    volumes:
+      - ./server/logs:/app/logs
+      - ./server/uploads:/app/uploads
+    networks:
+      - cybergrid-network
+    env_file:
+      - ./server/.env
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  cybergrid-network:
+    driver: bridge
