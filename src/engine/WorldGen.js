@@ -33,27 +33,13 @@ export class World {
         if (child.isMesh) {
           const name = child.name.toLowerCase();
           
-          // CRITICAL: Explicitly skip road, ground, floor, and street meshes
-          if (name.includes('road') || name.includes('ground') || name.includes('street') || 
-              name.includes('sidewalk') || name.includes('floor') || name.includes('path')) {
-            return;
-          }
-
-          const box = new THREE.Box3().setFromObject(child);
-          const size = new THREE.Vector3();
-          box.getSize(size);
-          
-          // Improved logic: If it's tall enough or has significant volume, it's an obstacle
-          // But it must be above the ground level (y > 0.5) to avoid blocking small pebbles/flat curbs
-          if (size.y > 2 && box.max.y > 1) {
-            const dist = Math.hypot(box.min.x, box.min.z);
-            if (dist > 30) { // Keep spawn clear
-              this.colliders.push({
-                name: child.name,
-                minX: box.min.x - 0.5, maxX: box.max.x + 0.5,
-                minZ: box.min.z - 0.5, maxZ: box.max.z + 0.5
-              });
-            }
+          // Only add colliders for tall things that are NOT named ground/road
+          if (name.includes('building') || name.includes('wall') || name.includes('structure')) {
+            const box = new THREE.Box3().setFromObject(child);
+            this.colliders.push({
+              minX: box.min.x - 1, maxX: box.max.x + 1,
+              minZ: box.min.z - 1, maxZ: box.max.z + 1
+            });
           }
         }
       });

@@ -44,8 +44,9 @@ export class Player {
     this.mesh.add(visor);
     this.scene.add(this.mesh);
     
-    // Initial spawn safely at 0,0,0
-    this.mesh.position.set(0, 2, 0);
+    // Move spawn to an open area to avoid getting stuck
+    this.mesh.position.set(200, 2, 200);
+    this.camera.position.set(200, 15, 230);
   }
 
   initEvents() {
@@ -95,7 +96,7 @@ export class Player {
 
   checkCollisions(nextPos) {
     // Check against the latest colliders in the array
-    const radius = 2.5;
+    const radius = 1.0; // Reduced for better precision
     for (let i = 0; i < this.colliders.length; i++) {
       const box = this.colliders[i];
       if (nextPos.x + radius > box.minX && nextPos.x - radius < box.maxX &&
