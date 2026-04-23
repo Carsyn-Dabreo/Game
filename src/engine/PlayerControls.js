@@ -139,6 +139,11 @@ export class Player {
       this.canJump = true;
     }
 
+    // World Boundaries (-1000 to 1000 for a large city)
+    const worldLimit = 1500;
+    nextPos.x = Math.max(-worldLimit, Math.min(worldLimit, nextPos.x));
+    nextPos.z = Math.max(-worldLimit, Math.min(worldLimit, nextPos.z));
+
     // Attempt to move horizontally, then vertically
     const horizontalPos = this.mesh.position.clone();
     horizontalPos.x = nextPos.x;

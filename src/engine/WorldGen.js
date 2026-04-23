@@ -31,17 +31,27 @@ export class World {
       // Use .push(...) to keep the same array reference
       city.traverse((child) => {
         if (child.isMesh) {
+          const name = child.name.toLowerCase();
+          
+          // CRITICAL: Explicitly skip road, ground, floor, and street meshes
+          if (name.includes('road') || name.includes('ground') || name.includes('street') || 
+              name.includes('sidewalk') || name.includes('floor') || name.includes('path')) {
+            return;
+          }
+
           const box = new THREE.Box3().setFromObject(child);
           const size = new THREE.Vector3();
           box.getSize(size);
           
-          // Only add colliders for vertical structures that are NOT near the spawn
-          if (size.y > 10 && box.min.y > 1) {
+          // Improved logic: If it's tall enough or has significant volume, it's an obstacle
+          // But it must be above the ground level (y > 0.5) to avoid blocking small pebbles/flat curbs
+          if (size.y > 2 && box.max.y > 1) {
             const dist = Math.hypot(box.min.x, box.min.z);
             if (dist > 30) { // Keep spawn clear
               this.colliders.push({
-                minX: box.min.x - 2, maxX: box.max.x + 2,
-                minZ: box.min.z - 2, maxZ: box.max.z + 2
+                name: child.name,
+                minX: box.min.x - 0.5, maxX: box.max.x + 0.5,
+                minZ: box.min.z - 0.5, maxZ: box.max.z + 0.5
               });
             }
           }

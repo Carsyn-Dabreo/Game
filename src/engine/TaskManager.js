@@ -135,28 +135,62 @@ export class TaskManager {
 
   // --- COMPLEX TASKS ---
   initAdvancedACL() {
-    this.content.innerHTML = `<div class="acl-description">FIREWALL OVERRIDE: Match the binary sequence.</div>`;
-    const target = Array.from({length: 6}, () => Math.round(Math.random())).join('');
-    this.content.innerHTML += `<div class="sequence-target" style="font-size: 24px; color: var(--neon-blue); margin: 1rem 0;">TARGET: ${target}</div>`;
-    const input = document.createElement('input'); input.className = 'cyber-input'; input.placeholder = 'ENTER BINARY';
-    const btn = document.createElement('button'); btn.className = 'cyber-btn-large'; btn.innerText = 'EXECUTE';
-    btn.onclick = () => { if(input.value === target) this.completeTask(500); else this.feedback.innerText = "INVALID SEQUENCE"; };
-    this.content.appendChild(input); this.content.appendChild(btn);
+    this.renderQuestion('NETWORK SECURITY');
   }
 
   initAdvancedMastermind() {
-    this.content.innerHTML = `<div class="acl-description">NEURAL DECRYPT: 5-digit hex key required.</div>`;
-    const btn = document.createElement('button'); btn.className = 'cyber-btn-large'; btn.innerText = 'OVERRIDE';
-    btn.onclick = () => this.completeTask(600);
-    this.content.appendChild(btn);
+    this.renderQuestion('APPLICATION SECURITY');
   }
 
   initAdvancedBreach() {
-    this.content.innerHTML = `<div class="acl-description">MANUAL OVERRIDE: Repeatedly pulse the system.</div>`;
-    let clicks = 0;
-    const btn = document.createElement('button'); btn.className = 'cyber-btn-large'; btn.innerText = `PULSE (0/20)`;
-    btn.onclick = () => { clicks++; btn.innerText = `PULSE (${clicks}/20)`; if(clicks >= 20) this.completeTask(500); };
-    this.content.appendChild(btn);
+    this.renderQuestion('CRYPTOGRAPHY');
+  }
+
+  renderQuestion(category) {
+    const questions = {
+      'NETWORK SECURITY': [
+        { q: "Which protocol is used to securely resolve domain names?", a: ["DNSSEC", "HTTPS", "SFTP", "SSH"], c: 0 },
+        { q: "What is the primary purpose of a DMZ in a network?", a: ["Data Backup", "Host public services", "Internal Storage", "User Auth"], c: 1 },
+        { q: "Which attack involves flooding a target with traffic?", a: ["Phishing", "DDoS", "SQLi", "XSS"], c: 1 }
+      ],
+      'APPLICATION SECURITY': [
+        { q: "What does XSS stand for?", a: ["Cross-Site Scripting", "Extensible Security", "X-ray Security", "Cross-Server Sync"], c: 0 },
+        { q: "How can you prevent SQL Injection?", a: ["Strong Passwords", "Parameterized Queries", "WAF Only", "Hashing"], c: 1 },
+        { q: "Which HTTP header prevents clickjacking?", a: ["X-Frame-Options", "CORS", "Content-Type", "Set-Cookie"], c: 0 }
+      ],
+      'CRYPTOGRAPHY': [
+        { q: "Which algorithm is asymmetric?", a: ["AES", "DES", "RSA", "Blowfish"], c: 2 },
+        { q: "What is a Salt in hashing used for?", a: ["Encryption", "Speed", "Preventing Rainbow Tables", "Compression"], c: 2 },
+        { q: "Which hash is considered insecure today?", a: ["SHA-256", "SHA-3", "MD5", "Bcrypt"], c: 2 }
+      ]
+    };
+
+    const pool = questions[category] || questions['NETWORK SECURITY'];
+    const data = pool[Math.floor(Math.random() * pool.length)];
+
+    this.content.innerHTML = `<div class="task-desc">${data.q}</div>`;
+    const optionsGrid = document.createElement('div');
+    optionsGrid.className = 'options-grid';
+
+    data.a.forEach((opt, idx) => {
+      const btn = document.createElement('button');
+      btn.className = 'cyber-option-btn';
+      btn.innerText = opt;
+      btn.onclick = () => {
+        if (idx === data.c) {
+          btn.style.borderColor = 'var(--neon-green)';
+          btn.style.color = 'var(--neon-green)';
+          this.completeTask(500);
+        } else {
+          btn.style.borderColor = 'var(--neon-pink)';
+          btn.style.color = 'var(--neon-pink)';
+          this.feedback.innerText = "ACCESS DENIED: INCORRECT RESPONSE";
+        }
+      };
+      optionsGrid.appendChild(btn);
+    });
+
+    this.content.appendChild(optionsGrid);
   }
 
   completeTask(reward) {

@@ -1147,3 +1147,54 @@ body {
   font-size: 14px;
   color: #eee;
 }
+/* ===========================
+   Cyber Question UI
+   =========================== */
+.task-desc {
+  font-size: 1.2rem;
+  color: var(--neon-blue);
+  margin-bottom: 2rem;
+  line-height: 1.5;
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+}
+
+.options-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.cyber-option-btn {
+  background: rgba(0, 240, 255, 0.05);
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  padding: 1rem;
+  color: white;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-align: left;
+  border-radius: 4px;
+}
+
+.cyber-option-btn:hover {
+  background: rgba(0, 240, 255, 0.15);
+  border-color: var(--neon-blue);
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+#task-feedback {
+  margin-top: 1.5rem;
+  font-weight: bold;
+  text-align: center;
+  min-height: 1.2em;
+  letter-spacing: 1px;
+}
+
+.acl-description {
+  margin-bottom: 1rem;
+  color: var(--neon-purple);
+  font-size: 0.9rem;
+}
