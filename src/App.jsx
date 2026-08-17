@@ -1,7 +1,7 @@
 import React from 'react'
-import VehicleLab from './components/vehicle/VehicleLabV2'
+import RealBikeLab from './components/vehicle/RealBikeLab'
 import './vehicle.css'
 
 export default function App() {
-  return <VehicleLab />
+  return <RealBikeLab />
 }
