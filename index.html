@@ -1,124 +1,14 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="CyberGrid - A futuristic cybersecurity training simulation inside a high-tech digital city network" />
-  <title>CyberGrid — Cybersecurity Training Simulation</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/style.css" />
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-    }
-    #root {
-      width: 100vw;
-      height: 100vh;
-    }
-  </style>
-</head>
-<body>
-  <!-- Login Screen -->
-  <div id="login-screen" class="screen">
-    <div class="bg-particles"></div>
-    <div class="cyber-card">
-      <div class="card-corner top-left"></div>
-      <div class="card-corner top-right"></div>
-      <div class="card-corner bottom-left"></div>
-      <div class="card-corner bottom-right"></div>
-      
-      <div class="status-info top">REGION: 04-NEON_CITY // STATUS: SECURE</div>
-      
-      <h1 class="glitch-text">CYBERGRID</h1>
-      <p class="subtitle">NEURAL INTERFACE INITIALIZING...</p>
-      
-      <div class="login-form">
-        <input type="text" id="username-input" placeholder="USER_IDENTIFIER" class="cyber-input">
-        <div class="input-glow"></div>
-      </div>
-      
-      <button id="login-btn" class="cyber-btn-large">
-        <span class="btn-text">ESTABLISH CONNECTION</span>
-        <span class="btn-glitch"></span>
-      </button>
-
-      <div class="status-info bottom">ENCRYPTION: AES-256-VIOLET // NODE: 127.0.0.1</div>
-    </div>
-  </div>
-
-  <!-- Avatar Selection Screen -->
-  <div id="avatar-screen" class="screen hidden">
-    <div class="screen-content">
-      <h2 class="section-title">SELECT OPERATIVE</h2>
-      <div id="avatar-preview-container">
-        <!-- 3D Canvas for avatar preview will be here -->
-      </div>
-      <div class="avatar-controls">
-        <button id="prev-avatar" class="nav-btn">&lt;</button>
-        <div id="avatar-name">INFILTRATOR</div>
-        <button id="next-avatar" class="nav-btn">&gt;</button>
-      </div>
-      <button id="start-game-btn" class="cyber-btn-large">DEPLOY TO NEON CITY</button>
-    </div>
-  </div>
-
-  <!-- Full Map Overlay -->
-  <div id="map-overlay" class="screen hidden">
-    <div class="map-content">
-      <h2 class="section-title">CITY GRID OVERVIEW</h2>
-      <div id="full-map-container">
-        <canvas id="full-map-canvas"></canvas>
-      </div>
-      <button id="close-map-btn" class="cyber-btn-large">RETURN TO FIELD</button>
-    </div>
-  </div>
-
-  <div id="game-container"></div>
-  <div id="ui-layer" class="hidden">
-    <div id="crosshair">+</div>
-    <div id="hud">
-      <div id="hud-mission" class="hud-panel">
-        <div class="hud-label">MISSION</div>
-        <div id="mission-description">7 vulnerable systems remaining</div>
-      </div>
-      
-      <div id="hud-progress" class="hud-panel">
-        <div class="hud-label">SYSTEMS SECURED</div>
-        <div class="progress-container">
-          <div id="progress-bar-fill"></div>
-        </div>
-        <div id="progress-text">1 / 8</div>
-      </div>
-      
-      <div id="hud-bottom">
-        <div id="interact-prompt" class="hidden">
-          <span class="key-hint">E</span> <span id="interact-text">Interact</span>
-        </div>
-      </div>
-      <div id="minimap-container">
-        <div id="minimap"></div>
-      </div>
-    </div>
-    
-    <!-- Task UI Overlay -->
-    <div id="task-overlay" class="hidden">
-      <div id="task-panel">
-        <div id="task-header">
-          <div id="task-title">SYSTEM OVERRIDE</div>
-          <button id="close-task-btn">X</button>
-        </div>
-        <div id="task-content">
-          <!-- Dynamically injected task content -->
-        </div>
-        <div id="task-feedback"></div>
-      </div>
-    </div>
-  </div>
-
-  <script type="module" src="/src/main.js"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#03070b" />
+    <meta name="description" content="Vehicle Lab — interactive 3D vehicle customization and mechanical simulation." />
+    <title>Vehicle Lab — 3D Mechanical Simulator</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>
