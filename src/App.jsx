@@ -1,7 +1,7 @@
 import React from 'react'
-import VehicleLabAssets from './components/vehicle/VehicleLabAssets'
+import VehicleLabV2 from './components/vehicle/VehicleLabV2'
 import './vehicle-polished.css'
 
-export default function App(){
-  return <VehicleLabAssets />
+export default function App() {
+  return <VehicleLabV2 />
 }
