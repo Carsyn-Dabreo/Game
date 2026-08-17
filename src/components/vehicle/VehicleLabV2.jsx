@@ -39,10 +39,10 @@ function Wheel({ z, front, removed, selected, onClick, moving = false }) {
 
 function Engine({ coverOpen, removed, selected, onClick }) {
   if (removed) return null
-  return <group position={[0, 0, 0]} onClick={e => { e.stopPropagation(); onClick('engine') }}>
+  return <group onClick={e => { e.stopPropagation(); onClick('engine') }}>
     <mesh position={[0, .92, 0]}><boxGeometry args={[.86, .78, .72]} /><Mat color="#171c21" /></mesh>
     {Array.from({ length: 8 }, (_, i) => <mesh key={i} position={[0, .62 + i * .08, .01]}><boxGeometry args={[1.02, .025, .7]} /><Mat color="#4c5862" /></mesh>)}
-    <mesh position={[0, 1.27, -.39]}><boxGeometry args={[.68, .48, .08]} /><Mat color={coverOpen ? '#0c1115' : selected === 'engine' ? '#22d3ee' : '#68747e'} /></mesh>
+    <mesh position={[0, 1.27, -.39]}><boxGeometry args={[.68, .48, .08]} /><Mat color={coverOpen ? '#0c1115' : selected ? '#22d3ee' : '#68747e'} /></mesh>
     <mesh position={[0, 1.05, .41]} rotation={[Math.PI / 2, 0, 0]}><cylinderGeometry args={[.18, .18, .18, 24]} /><Mat color="#9d5f32" /></mesh>
     {coverOpen && <group>
       <mesh position={[0, 1.32, -.47]}><cylinderGeometry args={[.28, .28, .05, 32]} /><Mat color="#c57a39" metal={.65} /></mesh>
@@ -54,29 +54,23 @@ function Engine({ coverOpen, removed, selected, onClick }) {
 
 function Bike({ removed, selected, onSelect, exploded, riding }) {
   const root = useRef()
-  const steer = useRef()
   useFrame((_, d) => {
-    if (!root.current) return
-    if (riding) root.current.position.z += d * .08
-    if (riding && root.current.position.z > 3) root.current.position.z = -3
+    if (!root.current || !riding) return
+    root.current.position.z += d * .08
+    if (root.current.position.z > 3) root.current.position.z = -3
   })
   const gap = exploded ? .35 : 0
   return <group ref={root}>
-    <group position={[0, 0, gap]}>
-      <Wheel z={1.55} front removed={removed.wheels} selected={selected === 'wheels'} onClick={onSelect} moving={riding} />
-    </group>
-    <group position={[0, 0, -gap]}>
-      <Wheel z={-1.55} removed={removed.wheels} selected={selected === 'wheels'} onClick={onSelect} moving={riding} />
-    </group>
+    <group position={[0, 0, gap]}><Wheel z={1.55} front removed={removed.wheels} selected={selected === 'wheels'} onClick={onSelect} moving={riding} /></group>
+    <group position={[0, 0, -gap]}><Wheel z={-1.55} removed={removed.wheels} selected={selected === 'wheels'} onClick={onSelect} moving={riding} /></group>
     <Beam a={[0, .56, 1.48]} b={[0, 1.45, .35]} />
     <Beam a={[0, .56, -1.42]} b={[0, 1.20, -.38]} />
     <Beam a={[0, 1.42, .35]} b={[0, .82, -1.1]} r={.055} color="#3b454e" />
-    <group ref={steer} position={[0, 0, 0]}>
-      <Beam a={[0, 1.38, .35]} b={[0, 1.73, 1.42]} r={.055} color="#8d99a2" />
-      <Beam a={[0, 1.73, 1.42]} b={[0, 1.64, 1.62]} r={.045} color="#77838d" />
-      <mesh position={[0, 1.64, 1.63]} rotation={[0, 0, Math.PI / 2]}><cylinderGeometry args={[.065, .065, .72, 18]} /><Mat color="#1a2026" /></mesh>
-    </group>
-    <Engine coverOpen={!removed.engineCover} removed={removed.engine} selected={selected === 'engine'} onClick={onSelect} />
+    <Beam a={[-.32, .82, -.95]} b={[.32, .82, -.95]} r={.04} color="#3b454e" />
+    <Beam a={[0, 1.38, .35]} b={[0, 1.73, 1.42]} r={.055} color="#8d99a2" />
+    <Beam a={[0, 1.73, 1.42]} b={[0, 1.64, 1.62]} r={.045} color="#77838d" />
+    <mesh position={[0, 1.64, 1.63]} rotation={[0, 0, Math.PI / 2]}><cylinderGeometry args={[.065, .065, .72, 18]} /><Mat color="#1a2026" /></mesh>
+    <Engine coverOpen={!!removed.engineCover} removed={removed.engine} selected={selected === 'engine'} onClick={onSelect} />
     {!removed.fairing && <group onClick={e => { e.stopPropagation(); onSelect('fairing') }}>
       <mesh position={[0, 1.55, .35]} scale={[.72, .36, .88]}><sphereGeometry args={[1, 32, 20]} /><Mat color={selected === 'fairing' ? '#0b8293' : '#10161b'} metal={.82} rough={.18} /></mesh>
       <mesh position={[0, 1.18, .92]} scale={[.53, .30, .62]}><sphereGeometry args={[1, 28, 16]} /><Mat color="#151b20" metal={.55} /></mesh>
@@ -108,12 +102,10 @@ function Track({ bike, speed }) {
     {Array.from({ length: 32 }, (_, i) => { const a = i * Math.PI * 2 / 32; return <mesh key={i} position={[Math.cos(a) * 6.45, .035, Math.sin(a) * 6.45]}><boxGeometry args={[.35, .25, .10]} /><Mat color={i % 2 ? '#d8d8d8' : '#e33a3a'} metal={.05} rough={.7} /></mesh> })}
     <Grid position={[0, .02, 0]} args={[50, 50]} cellSize={1} sectionSize={5} fadeDistance={30} sectionColor="#20323a" cellColor="#172329" />
     <Bike {...bike} riding />
-    <OrbitControls target={[0, 0.8, 0]} maxPolarAngle={Math.PI / 2.05} />
+    <OrbitControls target={[0, .8, 0]} maxPolarAngle={Math.PI / 2.05} />
     <Environment preset="night" />
     <directionalLight position={[5, 8, 4]} intensity={2.4} />
     <ambientLight intensity={.65} />
-    <Html position={[0, 2.8, 0]} center><div style={{ color: '#22d3ee', fontFamily: 'monospace', letterSpacing: 3, fontSize: 12 }}>RACE CIRCUIT // LIVE</div></Html>
-    <Html position={[0, 2.35, 0]} center><div style={{ color: '#fff', fontFamily: 'monospace', fontSize: 16 }}>{Math.round(speed)} KM/H</div></Html>
   </>
 }
 
@@ -140,22 +132,23 @@ export default function VehicleLabV2() {
   useEffect(() => {
     if (mode !== 'ride') return
     const down = e => {
-      if (['w', 'ArrowUp'].includes(e.key.toLowerCase())) setSpeed(s => Math.min(260, s + 8))
-      if (['s', 'ArrowDown'].includes(e.key.toLowerCase())) setSpeed(s => Math.max(0, s - 14))
-      if (['r'].includes(e.key.toLowerCase())) setSpeed(0)
+      if (['w', 'arrowup'].includes(e.key.toLowerCase())) setSpeed(s => Math.min(260, s + 8))
+      if (['s', 'arrowdown'].includes(e.key.toLowerCase())) setSpeed(s => Math.max(0, s - 14))
+      if (e.key.toLowerCase() === 'r') setSpeed(0)
     }
+    const up = e => { if (['w', 'arrowup'].includes(e.key.toLowerCase())) setSpeed(s => Math.max(0, s - 3)) }
     window.addEventListener('keydown', down)
-    return () => window.removeEventListener('keydown', down)
+    window.addEventListener('keyup', up)
+    return () => { window.removeEventListener('keydown', down); window.removeEventListener('keyup', up) }
   }, [mode])
 
-  const select = id => setSelected(id)
-  const toggleUpgrade = id => setUpgrades(v => v.includes(id) ? v.filter(x => x !== id) : [...v, id])
   const remove = id => setRemoved(v => ({ ...v, [id]: !v[id] }))
   const reset = () => { setRemoved({}); setUpgrades([]); setExploded(false); setSelected('engine'); setSpeed(0) }
+  const toggleUpgrade = id => setUpgrades(v => v.includes(id) ? v.filter(x => x !== id) : [...v, id])
 
   if (mode === 'ride') return <div style={{ position: 'fixed', inset: 0, background: '#05080a' }}>
     <Canvas camera={{ position: [0, 2.8, 8], fov: 55 }}>
-      <Track bike={{ removed, selected, onSelect: select, exploded: false }} speed={speed} />
+      <Track bike={{ removed, selected, onSelect: setSelected, exploded: false }} speed={speed} />
     </Canvas>
     <div style={ui.top}><b>VEHICLE<span style={{ color: '#22d3ee' }}>LAB</span></b><span>KAWASAKI NINJA 650 // 2021</span><button onClick={() => setMode('workshop')}>WORKSHOP</button></div>
     <div style={ui.ride}><strong>TEST RIDE</strong><div>W / ↑ ACCELERATE</div><div>S / ↓ BRAKE</div><div>R RESET</div><div style={{ fontSize: 26, color: '#22d3ee' }}>{Math.round(speed)} KM/H</div></div>
@@ -163,13 +156,13 @@ export default function VehicleLabV2() {
 
   return <div style={{ position: 'fixed', inset: 0, background: '#05080a', color: '#dce7eb', fontFamily: 'monospace' }}>
     <div style={ui.top}><b>VEHICLE<span style={{ color: '#22d3ee' }}>LAB</span></b><span>3D MECHANICAL SIMULATION // WORKSHOP BUILD 03</span><div><button style={ui.buttonActive}>WORKSHOP</button><button onClick={() => setMode('ride')}>TEST RIDE</button></div></div>
-    <div style={ui.left}><h4>WORKSHOP COMPONENTS</h4>{PARTS.map(([id, name, cat]) => <button key={id} onClick={() => select(id)} style={{ ...ui.item, ...(selected === id ? ui.selected : {}) }}><span>{name}<small>{cat}</small></span><em>{removed[id] ? 'REMOVED' : 'INSPECT'}</em></button>)}<h4 style={{ marginTop: 22 }}>UPGRADES</h4>{PARTS.slice(0, 5).map(([id, name]) => <button key={id} onClick={() => toggleUpgrade(id)} style={ui.item}><span>{name}<small>{upgrades.includes(id) ? 'INSTALLED' : 'STOCK'}</small></span><em>{upgrades.includes(id) ? 'ON' : 'ADD'}</em></button>)}</div>
-    <div style={ui.right}><h4>LIVE VEHICLE STATE</h4>{[['POWER', stats.power + ' HP'], ['WEIGHT', stats.weight + ' KG'], ['GRIP', stats.grip + '%'], ['BRAKING', stats.braking + '%'], ['HANDLING', stats.handling + '%']].map(x => <div key={x[0]} style={ui.stat}><span>{x[0]}</span><b>{x[1]}</b></div>)}<hr/><h4>SELECTED PART</h4><div style={ui.card}><b>{selected.toUpperCase()}</b><small>3D COMPONENT // PHYSICALLY INTERACTIVE</small></div><button onClick={() => remove(selected)} style={ui.big}>{removed[selected] ? 'RESTORE PART' : 'REMOVE PART'}</button>{selected === 'engine' && <button onClick={() => remove('engineCover')} style={ui.big}>{removed.engineCover ? 'CLOSE ENGINE COVER' : 'OPEN ENGINE COVER'}</button>}<button onClick={() => setExploded(v => !v)} style={ui.big}>{exploded ? 'ASSEMBLE VEHICLE' : 'EXPLODE ASSEMBLY'}</button><button onClick={reset} style={ui.big}>RESET BUILD</button><button onClick={() => setMode('ride')} style={{ ...ui.big, borderColor: '#20e09b', color: '#20e09b' }}>ENTER RACE TRACK</button></div>
+    <div style={ui.left}><h4>WORKSHOP COMPONENTS</h4>{PARTS.map(([id, name, cat]) => <button key={id} onClick={() => setSelected(id)} style={{ ...ui.item, ...(selected === id ? ui.selected : {}) }}><span>{name}<small>{cat}</small></span><em>{removed[id] ? 'REMOVED' : 'INSPECT'}</em></button>)}<h4 style={{ marginTop: 22 }}>UPGRADES</h4>{PARTS.slice(0, 5).map(([id, name]) => <button key={id} onClick={() => toggleUpgrade(id)} style={ui.item}><span>{name}<small>{upgrades.includes(id) ? 'INSTALLED' : 'STOCK'}</small></span><em>{upgrades.includes(id) ? 'ON' : 'ADD'}</em></button>)}</div>
+    <div style={ui.right}><h4>LIVE VEHICLE STATE</h4>{[['POWER', stats.power + ' HP'], ['WEIGHT', stats.weight + ' KG'], ['GRIP', stats.grip + '%'], ['BRAKING', stats.braking + '%'], ['HANDLING', stats.handling + '%']].map(x => <div key={x[0]} style={ui.stat}><span>{x[0]}</span><b>{x[1]}</b></div>)}<hr/><h4>SELECTED PART</h4><div style={ui.card}><b>{selected.toUpperCase()}</b><small>3D COMPONENT // CLICK TO INSPECT</small></div><button onClick={() => remove(selected)} style={ui.big}>{removed[selected] ? 'RESTORE PART' : 'REMOVE PART'}</button>{selected === 'engine' && <button onClick={() => remove('engineCover')} style={ui.big}>{removed.engineCover ? 'CLOSE ENGINE COVER' : 'OPEN ENGINE COVER'}</button>}<button onClick={() => setExploded(v => !v)} style={ui.big}>{exploded ? 'ASSEMBLE VEHICLE' : 'EXPLODE ASSEMBLY'}</button><button onClick={reset} style={ui.big}>RESET BUILD</button><button onClick={() => setMode('ride')} style={{ ...ui.big, borderColor: '#20e09b', color: '#20e09b' }}>ENTER RACE TRACK</button></div>
     <Canvas camera={{ position: [4.8, 2.8, 5.4], fov: 48 }}>
       <color attach="background" args={['#05080a']} />
       <ambientLight intensity={1.1} /><directionalLight position={[4, 7, 5]} intensity={3} /><directionalLight position={[-4, 3, -4]} intensity={1.5} color="#1a8fa3" />
       <Grid args={[40, 40]} cellSize={.5} sectionSize={2.5} fadeDistance={24} sectionColor="#16414a" cellColor="#0c252b" />
-      <Bike removed={removed} selected={selected} onSelect={select} exploded={exploded} riding={false} />
+      <Bike removed={removed} selected={selected} onSelect={setSelected} exploded={exploded} riding={false} />
       <OrbitControls target={[0, 1, 0]} minDistance={2.5} maxDistance={10} enableDamping />
       <Environment preset="city" />
     </Canvas>
